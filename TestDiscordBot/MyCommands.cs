@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -11,6 +12,10 @@ namespace TestDiscordBot
 {
     public class MyCommands
     {
+        ulong playerId = 0;
+        string playerMention;
+        CancellationTokenSource cts;
+
         [Command("hi")]
         [Description("Поздороваться с ботом")]
         public async Task Hi(CommandContext ctx)
@@ -49,7 +54,7 @@ namespace TestDiscordBot
         }
 
         [Command("knb")]
-        [Description("Камень-ножницы-бумага")]
+        [Description("Камень-ножницы-бумага с ботом")]
         public async Task Knb(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
@@ -117,6 +122,124 @@ namespace TestDiscordBot
                 Console.WriteLine(e.Message);
             }
 
+        }
+
+        private async Task ResetPlayer(CommandContext ctx, int delay, CancellationToken tkn)
+        {
+            try
+            {
+                await Task.Delay(delay, tkn);
+                playerId = 0;
+                await ctx.RespondAsync("Прошел период ожидания второго игрока. Игровая сессия отменена.");
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+
+            return;
+        }
+
+        [Command("knb2p")]
+        [Description("Камень-ножницы-бумага на двоих")]
+        public async Task Knb2p(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+            if (playerId == 0)
+            {
+                cts = new CancellationTokenSource();
+                playerId = ctx.Member.Id;
+                playerMention = ctx.Member.Mention;
+                await ctx.RespondAsync($"Игрок1 = {playerMention}. Ждем второго игрока 30 секунд. Для присоединения напишите !knb2p.");
+
+                await Task.Run(() => ResetPlayer(ctx, 30000, cts.Token));
+
+
+                cts = null;
+                return;
+            }
+            else
+            {
+                if (playerId == ctx.Member.Id)
+                {
+                    await ctx.RespondAsync("Необходим второй игрок! Игровая сессия отменена.");
+                    playerId = 0;
+                    cts.Cancel();
+                    return;
+                }
+                else
+                {
+                    cts.Cancel();
+                    
+
+                    int value1, value2;
+                    Random rnd = new Random();
+                    value1 = rnd.Next(1, 4);
+                    value2 = rnd.Next(1, 4);
+                    string responce = "";
+
+                    switch (value1)
+                    {
+                        case 1: responce += ($"{playerMention}: Камень\n"); break;
+                        case 2: responce += ($"{playerMention}: Ножницы\n"); break;
+                        case 3: responce += ($"{playerMention}: Бумага\n"); break;
+                        default: break;
+                    }
+
+                    switch (value2)
+                    {
+                        case 1: responce += ($"{ctx.User.Mention}: Камень\n"); break;
+                        case 2: responce += ($"{ctx.User.Mention}: Ножницы\n"); break;
+                        case 3: responce += ($"{ctx.User.Mention}: Бумага\n"); break;
+                        default: break;
+                    }
+
+                    if (value1 == value2)
+                    {
+                        responce += ("Результат: Ничья!");
+                    }
+                    else
+                    {
+                        int diff = Math.Max(value1, value2) - Math.Min(value1, value2);
+                        if (diff == 1)
+                        {
+                            if (value1 == Math.Min(value1, value2))
+                            {
+                                responce += ($"Победил {playerMention}!");
+                            }
+                            else
+                            {
+                                responce += ($"Победил {ctx.User.Mention}!");
+                            }
+                        }
+                        else
+                        {
+                            if (value1 == Math.Max(value1, value2))
+                            {
+                                responce += ($"Победил {playerMention}!");
+                            }
+                            else
+                            {
+                                responce += ($"Победил {ctx.User.Mention}!");
+                            }
+                        }
+                    }
+
+                    try
+                    {
+                        await ctx.RespondAsync(responce);
+                    }
+
+
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+
+                    playerId = 0;
+                    playerMention = "";
+                }
+            }
         }
 
         [Command("xD")]

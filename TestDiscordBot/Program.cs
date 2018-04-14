@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.IO;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 
@@ -9,15 +10,27 @@ namespace TestDiscordBot
     {
         static CommandsNextModule commands;
         static DiscordClient discord;
+        const string tokenFilename = "token.txt";
         static void Main(string[] args)
         {
             MainAsync(args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         static async Task MainAsync(string[] args)
         {
+            string[] tokenStr;
+            try
+            {
+                tokenStr = File.ReadAllLines(tokenFilename);
+            }
+            
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return;
+            }
             discord = new DiscordClient(new DiscordConfiguration
             {
-                Token = "NDI2NzgzNzk2MDE3NDk2MDgy.DZbcdw.NR8BxdjEcso0oa6ZfGKt1UIljLQ",
+                Token = tokenStr[0],
                 TokenType = TokenType.Bot,
                 UseInternalLogHandler = true,
                 LogLevel = LogLevel.Debug
