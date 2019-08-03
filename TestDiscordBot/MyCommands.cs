@@ -10,7 +10,7 @@ using DSharpPlus.Entities;
 
 namespace TestDiscordBot
 {
-    public class MyCommands
+    public class MyCommands : BaseCommandModule
     {
         ulong playerId = 0;
         string playerMention;

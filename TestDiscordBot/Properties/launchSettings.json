@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "TestDiscordBot": {
+      "commandName": "Project"
+    }
+  }
+}
