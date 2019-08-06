@@ -6,6 +6,8 @@
     <AssemblyName>MyDiscordBot</AssemblyName>
     <RootNamespace>MyDiscordBot</RootNamespace>
     <StartupObject>TestDiscordBot.BotRunner</StartupObject>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

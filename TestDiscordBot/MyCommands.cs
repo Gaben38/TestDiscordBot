@@ -1,20 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using MyDiscordBot.Knb;
+using MyDiscordBot.Models;
+using MyDiscordBot.Utility;
 
 namespace TestDiscordBot
 {
     public class MyCommands : BaseCommandModule
     {
-        ulong playerId = 0;
-        string playerMention;
-        CancellationTokenSource cts;
+        public int KnbSessionWaitTime { get; } = 30;
+        private KnbState KnbState
+        {
+            get
+            {
+                lock (_stateLock)
+                {
+                    return _knbState;
+                }
+            }
+            set
+            {
+                lock (_stateLock)
+                {
+                    _knbState = value;
+                }
+            }
+        }
+
+        private KnbState _knbState = null;
+        private readonly object _stateLock = new object();
 
         [Command("hi")]
         [Description("Поздороваться с ботом")]
@@ -58,58 +76,9 @@ namespace TestDiscordBot
         public async Task Knb(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            int value1, value2;
-            Random rnd = new Random();
-            value1 = rnd.Next(1, 4);
-            value2 = rnd.Next(1, 4);
-            string responce = "";
 
-            switch (value1)
-            {
-                case 1: responce+=("Бот: Камень\n"); break;
-                case 2: responce+=("Бот: Ножницы\n"); break;
-                case 3: responce+=("Бот: Бумага\n"); break;
-                default: break;
-            }
-
-            switch (value2)
-            {
-                case 1: responce+= ($"{ctx.User.Mention}: Камень\n"); break;
-                case 2: responce+= ($"{ctx.User.Mention}: Ножницы\n"); break;
-                case 3: responce+= ($"{ctx.User.Mention}: Бумага\n"); break;
-                default: break;
-            }
-
-            if (value1 == value2)
-            {
-                responce+= ("Результат: Ничья!");
-            }
-            else
-            {
-                int diff = Math.Max(value1, value2) - Math.Min(value1, value2);
-                if(diff == 1)
-                {
-                    if(value1 == Math.Min(value1, value2))
-                    {
-                        responce += ("Победил Бот!");
-                    }
-                    else
-                    {
-                        responce += ($"Победил {ctx.User.Mention}!");
-                    }
-                }
-                else
-                {
-                    if (value1 == Math.Max(value1, value2))
-                    {
-                        responce += ("Победил Бот!");
-                    }
-                    else
-                    {
-                        responce += ($"Победил {ctx.User.Mention}!");
-                    }
-                }
-            }
+            var result = KnbGame.Play();
+            var responce = FormKnbResultResponce(result, ctx.User.Mention, "Бот");
 
             try
             {
@@ -124,121 +93,43 @@ namespace TestDiscordBot
 
         }
 
-        private async Task ResetPlayer(CommandContext ctx, int delay, CancellationToken tkn)
-        {
-            try
-            {
-                await Task.Delay(delay, tkn);
-                playerId = 0;
-                await ctx.RespondAsync("Прошел период ожидания второго игрока. Игровая сессия отменена.");
-            }
-            catch (OperationCanceledException)
-            {
-
-            }
-
-            return;
-        }
-
         [Command("knb2p")]
         [Description("Камень-ножницы-бумага на двоих")]
         public async Task Knb2p(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            if (playerId == 0)
+            if (KnbState == null)
             {
-                cts = new CancellationTokenSource();
-                playerId = ctx.Member.Id;
-                playerMention = ctx.Member.Mention;
-                await ctx.RespondAsync($"Игрок1 = {playerMention}. Ждем второго игрока 30 секунд. Для присоединения напишите !knb2p.");
+                KnbState = new KnbState(ctx.Member, new CancellationTokenSource());
+                await ctx.RespondAsync($"Player 1 = {KnbState.FirstPlayer.Mention}. Ждем второго игрока {KnbSessionWaitTime} секунд. Для присоединения напишите !knb2p.");
 
-                await Task.Run(() => ResetPlayer(ctx, 30000, cts.Token));
-
-
-                cts = null;
+                await Task.Run(() => ResetPlayer(ctx, TimeSpan.FromSeconds(KnbSessionWaitTime), KnbState.Cts.Token));
                 return;
             }
             else
             {
-                if (playerId == ctx.Member.Id)
+                KnbState.Cts.Cancel();
+
+                if (KnbState.FirstPlayer.Id == ctx.Member.Id)
                 {
                     await ctx.RespondAsync("Необходим второй игрок! Игровая сессия отменена.");
-                    playerId = 0;
-                    cts.Cancel();
-                    return;
                 }
                 else
-                {
-                    cts.Cancel();
-                    
-
-                    int value1, value2;
-                    Random rnd = new Random();
-                    value1 = rnd.Next(1, 4);
-                    value2 = rnd.Next(1, 4);
-                    string responce = "";
-
-                    switch (value1)
-                    {
-                        case 1: responce += ($"{playerMention}: Камень\n"); break;
-                        case 2: responce += ($"{playerMention}: Ножницы\n"); break;
-                        case 3: responce += ($"{playerMention}: Бумага\n"); break;
-                        default: break;
-                    }
-
-                    switch (value2)
-                    {
-                        case 1: responce += ($"{ctx.User.Mention}: Камень\n"); break;
-                        case 2: responce += ($"{ctx.User.Mention}: Ножницы\n"); break;
-                        case 3: responce += ($"{ctx.User.Mention}: Бумага\n"); break;
-                        default: break;
-                    }
-
-                    if (value1 == value2)
-                    {
-                        responce += ("Результат: Ничья!");
-                    }
-                    else
-                    {
-                        int diff = Math.Max(value1, value2) - Math.Min(value1, value2);
-                        if (diff == 1)
-                        {
-                            if (value1 == Math.Min(value1, value2))
-                            {
-                                responce += ($"Победил {playerMention}!");
-                            }
-                            else
-                            {
-                                responce += ($"Победил {ctx.User.Mention}!");
-                            }
-                        }
-                        else
-                        {
-                            if (value1 == Math.Max(value1, value2))
-                            {
-                                responce += ($"Победил {playerMention}!");
-                            }
-                            else
-                            {
-                                responce += ($"Победил {ctx.User.Mention}!");
-                            }
-                        }
-                    }
+                {                   
+                    var result = KnbGame.Play();
+                    var responce = FormKnbResultResponce(result, KnbState.FirstPlayer.Mention, ctx.User.Mention);
 
                     try
                     {
                         await ctx.RespondAsync(responce);
                     }
-
-
                     catch (Exception e)
                     {
                         Console.WriteLine(e.Message);
                     }
-
-                    playerId = 0;
-                    playerMention = "";
                 }
+
+                KnbState = null;
             }
         }
 
@@ -260,6 +151,58 @@ namespace TestDiscordBot
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        [Command("version")]
+        [Description("Вывод версии бота.")]
+        public async Task VersionCommand(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+            string asmVersion = VersionHelper.AssemblyVersion;
+
+            try
+            {
+                await ctx.RespondAsync($"Версия бота: {asmVersion}");
+            }
+
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        private async Task ResetPlayer(CommandContext ctx, TimeSpan delay, CancellationToken tkn)
+        {
+            try
+            {
+                await Task.Delay(delay, tkn);
+                KnbState = null;
+                await ctx.RespondAsync("Прошел период ожидания второго игрока. Игровая сессия отменена.");
+            }
+            catch (OperationCanceledException)
+            {
+
+            }
+
+            return;
+        }
+
+        private string FormKnbResultResponce(KnbResult result, string player1Name, string player2Name)
+        {
+            string responce = "";
+            responce += $"{player1Name}: {result.Player1Gesture.ToString()}" + Environment.NewLine;
+            responce += $"{player2Name}: {result.Player2Gesture.ToString()}" + Environment.NewLine;
+
+            switch (result.Result)
+            {
+                case KnbResultType.Player1Won: responce += $"Победил {player1Name}!"; break;
+                case KnbResultType.Player2Won: responce += $"Победил {player2Name}!"; break;
+                case KnbResultType.Draw: responce += $"Ничья!"; break;
+                default: responce += "Шото пошло не так. Не смог вычислить победителя."; break;
+            }
+
+            return responce;
         }
     }
 }

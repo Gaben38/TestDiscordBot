@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.IO;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
 
 namespace TestDiscordBot
 {
