@@ -39,8 +39,9 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
-    publishWebProjects: true
-    arguments: '-o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
+    publishWebProjects: false
+    projects: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot/TestDiscordBot.csproj'
+    arguments: '-o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/''artifacts/'
 
 # Publish artifacts
 - task: PublishBuildArtifacts@1
