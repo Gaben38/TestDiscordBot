@@ -41,7 +41,7 @@ steps:
     command: 'publish'
     publishWebProjects: false
     projects: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot/TestDiscordBot.csproj'
-    arguments: '--no-build -o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/''artifacts/'
+    arguments: '--no-build -o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
 
 # Publish artifacts
 - task: PublishBuildArtifacts@1
