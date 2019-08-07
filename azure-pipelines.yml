@@ -7,18 +7,13 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 steps:
 - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
   clean: all  # whether to fetch clean each time
   path: '$(BotDirectoryName)/'  # path to check out source code, relative to the agent's build directory (e.g. \_work\1)
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
-
+  
 # Install Nuget
 - task: NuGetToolInstaller@1
   inputs:
