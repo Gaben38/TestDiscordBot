@@ -10,8 +10,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- checkout: self  # self represents the repo where the initial Pipelines YAML file was found
+  clean: all  # whether to fetch clean each time
+  path: '$(BotDirectoryName)/'  # path to check out source code, relative to the agent's build directory (e.g. \_work\1)
 
 - script: |
     echo Add other tasks to build, test, and deploy your project.
@@ -27,14 +28,14 @@ steps:
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
-    restoreSolution: '$(Agent.BuildDirectory)/TestDiscordBot.sln'
+    restoreSolution: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot.sln'
     feedsToUse: 'config'
-    nugetConfigPath: '$(Agent.BuildDirectory)/NuGet.config'
+    nugetConfigPath: '$(Agent.BuildDirectory)/$(BotDirectoryName)/NuGet.config'
 
 # Build solution with VS 2019
 - task: VSBuild@1
   inputs:
-    solution: '$(Agent.BuildDirectory)/TestDiscordBot.sln'
+    solution: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot.sln'
     vsVersion: '16.0'
     restoreNugetPackages: true
     msbuildArchitecture: 'x64'
@@ -44,11 +45,11 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '-o $(Agent.BuildDirectory)artifacts/'
+    arguments: '-o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
 
 # Publish artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: '$(Agent.BuildDirectory)/artifacts/'
+    PathtoPublish: '$(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
     ArtifactName: 'Published Bot'
     publishLocation: 'Container'
