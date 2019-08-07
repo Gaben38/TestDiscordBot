@@ -1,4 +1,32 @@
 # Starter pipeline
+- task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: '5.2.0'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: 'TestDiscordBot.sln'
+    feedsToUse: 'select'
+
+- task: VSBuild@1
+  inputs:
+    solution: 'TestDiscordBot.sln'
+    vsVersion: '16.0'
+    restoreNugetPackages: true
+    msbuildArchitecture: 'x64'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '-o artifacts/'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'artifacts/'
+    ArtifactName: 'Published Bot'
+    publishLocation: 'Container'
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
