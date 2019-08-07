@@ -29,7 +29,7 @@ steps:
     command: 'restore'
     restoreSolution: 'TestDiscordBot.sln'
     feedsToUse: 'config'
-    nugetConfigPath: 'Nuget.config'
+    nugetConfigPath: 'NuGet.config'
 
 # Build solution with VS 2019
 - task: VSBuild@1
