@@ -32,7 +32,7 @@ steps:
   inputs:
     solution: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot.sln'
     vsVersion: '16.0'
-    restoreNugetPackages: true
+    restoreNugetPackages: false
     msbuildArchitecture: 'x64'
 
 # Publish .NET Core App
@@ -42,6 +42,7 @@ steps:
     publishWebProjects: false
     projects: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot/TestDiscordBot.csproj'
     arguments: '--no-build -o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
+    zipAfterPublish: false
 
 # Publish artifacts
 - task: PublishBuildArtifacts@1
