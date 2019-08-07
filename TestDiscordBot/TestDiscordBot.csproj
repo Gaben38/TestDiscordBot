@@ -6,8 +6,8 @@
     <AssemblyName>MyDiscordBot</AssemblyName>
     <RootNamespace>MyDiscordBot</RootNamespace>
     <StartupObject>TestDiscordBot.BotRunner</StartupObject>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -17,6 +17,8 @@
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00621" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00621" />
+    <PackageReference Include="System.ServiceModel.Syndication" Version="4.5.0" />
+    <PackageReference Include="System.ServiceModel.Web" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
