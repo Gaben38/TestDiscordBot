@@ -18,31 +18,37 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
 
+# Install Nuget
 - task: NuGetToolInstaller@1
   inputs:
     versionSpec: '5.2.0'
 
+# Restore nuget packages
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
-    restoreSolution: 'TestDiscordBot.sln'
-    feedsToUse: 'select'
+    restoreSolution: '$(Agent.BuildDirectory)/TestDiscordBot.sln'
+    feedsToUse: 'config'
+    nugetConfigPath: '$(Agent.BuildDirectory)/NuGet.config'
 
+# Build solution with VS 2019
 - task: VSBuild@1
   inputs:
-    solution: 'TestDiscordBot.sln'
+    solution: '$(Agent.BuildDirectory)/TestDiscordBot.sln'
     vsVersion: '16.0'
     restoreNugetPackages: true
     msbuildArchitecture: 'x64'
 
+# Publish .NET Core App
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '-o artifacts/'
+    arguments: '-o $(Agent.BuildDirectory)artifacts/'
 
+# Publish artifacts
 - task: PublishBuildArtifacts@1
   inputs:
-    PathtoPublish: 'artifacts/'
+    PathtoPublish: '$(Agent.BuildDirectory)/artifacts/'
     ArtifactName: 'Published Bot'
     publishLocation: 'Container'
