@@ -1,8 +1,8 @@
-﻿using DSharpPlus;
+﻿using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using System.Threading.Tasks;
 
-namespace TestDiscordBot
+namespace MyDiscordBot
 {
     public class MyBot
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.IO;
+using System.Threading.Tasks;
 
-namespace TestDiscordBot
+namespace MyDiscordBot
 {
     public class BotRunner
     {

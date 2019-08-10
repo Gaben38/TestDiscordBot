@@ -9,7 +9,7 @@ using MyDiscordBot.Knb;
 using MyDiscordBot.Models;
 using MyDiscordBot.Utility;
 
-namespace TestDiscordBot
+namespace MyDiscordBot
 {
     public class MyCommands : BaseCommandModule
     {
@@ -191,9 +191,11 @@ namespace TestDiscordBot
                 response += $"`{article.Summary.Text}`" + Environment.NewLine;
                 response += $"`Фулл: {article.Links[0].Uri}`" + Environment.NewLine;
                 response += Environment.NewLine;
+                await ctx.RespondAsync(response);
+                response = "";
             }
 
-            await ctx.RespondAsync(response);
+            //await ctx.RespondAsync(response);
         }
 
         private async Task ResetPlayer(CommandContext ctx, TimeSpan delay, CancellationToken tkn)

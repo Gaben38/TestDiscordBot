@@ -5,7 +5,7 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AssemblyName>MyDiscordBot</AssemblyName>
     <RootNamespace>MyDiscordBot</RootNamespace>
-    <StartupObject>TestDiscordBot.BotRunner</StartupObject>
+    <StartupObject>MyDiscordBot.BotRunner</StartupObject>
     <AssemblyVersion>1.0.2.0</AssemblyVersion>
     <FileVersion>1.0.2.0</FileVersion>
   </PropertyGroup>
