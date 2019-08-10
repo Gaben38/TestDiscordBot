@@ -7,18 +7,13 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 steps:
 - checkout: self  # self represents the repo where the initial Pipelines YAML file was found
   clean: all  # whether to fetch clean each time
   path: '$(BotDirectoryName)/'  # path to check out source code, relative to the agent's build directory (e.g. \_work\1)
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
-
+  
 # Install Nuget
 - task: NuGetToolInstaller@1
   inputs:
@@ -37,15 +32,17 @@ steps:
   inputs:
     solution: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot.sln'
     vsVersion: '16.0'
-    restoreNugetPackages: true
+    restoreNugetPackages: false
     msbuildArchitecture: 'x64'
 
 # Publish .NET Core App
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
-    publishWebProjects: true
-    arguments: '-o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
+    publishWebProjects: false
+    projects: '$(Agent.BuildDirectory)/$(BotDirectoryName)/TestDiscordBot/TestDiscordBot.csproj'
+    arguments: '--no-build -o $(Agent.BuildDirectory)/$(BotDirectoryName)/artifacts/'
+    zipAfterPublish: false
 
 # Publish artifacts
 - task: PublishBuildArtifacts@1
